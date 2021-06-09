@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>Raw URL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<style>input {border: 1px solid #ccc;border-radius: 5px;font-size: 15pt;}
+html,body{height:100%;margin:0;padding:0;}
+body{display: flex;align-items:center;justify-content:
+center;flex-direction:column;}::placeholder{color:#ddd;}
+.cmd { margin-top: 8px; opacity: 1; transform-origin: 50% 0%; transform: scale(2); }
+.icon-copy:active{
+	background: #0001;
+}
+.icon-copy{
+	box-sizing: inherit;
+	padding: 2px;
+	border-radius: 2px;
+    display: inline-block;
+    font-size: inherit;
+    font-style: normal;
+    height: 1em;
+    position: relative;
+    text-indent: -9999px;
+    vertical-align: middle;
+    width: 1em;
+}
+.icon-copy::after, .icon-copy::before {
+	box-sizing: border-box;
+    content: "";
+    display: block;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%,-50%);
+}
+.icon-copy::after {
+    border: .1rem solid currentColor;
+    border-radius: .1em;
+    height: .8em;
+    left: 60%;
+    top: 60%;
+    width: .7em;
+}
+.icon-copy::before {
+    border: .1rem solid currentColor;
+    border-bottom-color: transparent;
+    border-radius: .1em;
+    border-right-color: transparent;
+    height: .8em;
+    left: 40%;
+    top: 40%;
+    width: .7em;
+}
+
+</style>
+</head>
+<body>
+<script>
+	function copyToClipboard(str) {
+		try {
+			var ta = document.createElement("textarea");
+			ta.value = str;
+			ta.style.display = "none";
+			document.body.appendChild(ta);
+			ta.select();
+			console.log(document.execCommand("copy"));
+			document.body.removeChild(ta);
+		} catch (e) {
+		}
+		try {
+			navigator.clipboard.writeText(str);
+		} catch (e) {
+		}
+	}
+
+	var search = Object.fromEntries(location.search.replace(/^\?/g, "").split("&").map(e => {
+		var eq = e.indexOf("=");
+		var pair = [e.substring(0, eq), e.substring(eq + 1)];
+		return pair.map(c =>decodeURIComponent(c));
+	}));
+
+	var target = search._;
+	let urlToCopy = location;
+	if (target) {
+		if (!/^[a-z]+:\/\//.test(target)) target = "https://"+target;
+		urlToCopy = target;
+		var a = document.createElement("a");
+		a.href = target;
+		a.textContent = target;
+		document.body.appendChild(a);
+	} else {
+		var i = document.createElement("input");
+		i.type = "url";
+		i.placeholder = "https://www.example.com/";
+		i.oninput = () => {
+			var url = location.origin + location.pathname +
+				"?_="+encodeURIComponent(i.value);
+			history.replaceState({}, document.title, url);
+		};
+		i.style.width = "calc(100vw - 32px)";
+		document.body.style.textAlign = "center";
+		document.body.appendChild(i);
+	}
+	var copy = document.createElement("i");
+	copy.className = "icon-copy";
+	copy.addEventListener("click", _ => {
+		copyToClipboard(urlToCopy.toString());
+	});
+	var commandPalette = document.createElement("span");
+	commandPalette.className = "cmd";
+	commandPalette.appendChild(copy);
+	document.body.appendChild(commandPalette);
+</script>
+</body>
+</html>
